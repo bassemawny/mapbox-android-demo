@@ -96,6 +96,7 @@ import com.mapbox.mapboxandroiddemo.examples.labs.PulsingLayerOpacityColorActivi
 import com.mapbox.mapboxandroiddemo.examples.labs.RecyclerViewDirectionsActivity;
 import com.mapbox.mapboxandroiddemo.examples.labs.RecyclerViewOnMapActivity;
 import com.mapbox.mapboxandroiddemo.examples.labs.SharedPreferencesActivity;
+import com.mapbox.mapboxandroiddemo.examples.labs.SatelliteHeatmapEventActivity;
 import com.mapbox.mapboxandroiddemo.examples.labs.SnakingDirectionsRouteActivity;
 import com.mapbox.mapboxandroiddemo.examples.labs.SpaceStationLocationActivity;
 import com.mapbox.mapboxandroiddemo.examples.labs.SpinningSymbolLayerIconActivity;
@@ -1286,6 +1287,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         new Intent(MainActivity.this, SharedPreferencesActivity.class),
         null,
         R.string.activity_lab_shared_preferences_url, true, BuildConfig.MIN_SDK_VERSION));
+
+    exampleItemModels.add(new ExampleItemModel(
+        R.id.nav_lab,
+        R.string.activity_lab_satellite_heatmap_event_title,
+        R.string.activity_lab_satellite_heatmap_event_description,
+        new Intent(MainActivity.this, SatelliteHeatmapEventActivity.class),
+        null,
+        R.string.activity_lab_satellite_heatmap_event_url, true, BuildConfig.MIN_SDK_VERSION));
 
     exampleItemModels.add(new ExampleItemModel(
       R.id.nav_dds,
