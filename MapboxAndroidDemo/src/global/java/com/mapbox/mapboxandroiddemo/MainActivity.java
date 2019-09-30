@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -202,6 +203,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
   private boolean loggedIn;
   private int currentCategory = R.id.nav_basics;
   private boolean showJavaExamples = true;
+  private long clickTimeOfLastSelectedExample = 0;
+  public static final long CLICK_SPEED_THRESHOLD_MS = 1000;
 
   @Override
   @AddTrace(name = "onCreateMainActivity")
@@ -251,14 +254,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // in case it's an info tile
         if (model != null) {
-          if (showJavaExamples) {
-            startActivity(model.getJavaActivity());
-          } else {
-            startActivity(model.getKotlinActivity());
-          }
 
-          analytics.clickedOnIndividualExample(getString(model.getTitle()), loggedIn);
-          analytics.viewedScreen(getString(model.getTitle()), loggedIn);
+          // Prevents rapid double click.
+          if (SystemClock.elapsedRealtime() - clickTimeOfLastSelectedExample > CLICK_SPEED_THRESHOLD_MS) {
+            clickTimeOfLastSelectedExample = SystemClock.elapsedRealtime();
+            if (showJavaExamples) {
+              startActivity(model.getJavaActivity());
+            } else {
+              startActivity(model.getKotlinActivity());
+            }
+
+            analytics.clickedOnIndividualExample(getString(model.getTitle()), loggedIn);
+            analytics.viewedScreen(getString(model.getTitle()), loggedIn);
+          }
         }
       }
     });
