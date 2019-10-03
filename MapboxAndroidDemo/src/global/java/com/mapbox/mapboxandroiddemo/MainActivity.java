@@ -182,7 +182,8 @@ import static com.mapbox.mapboxandroiddemo.commons.StringConstants.FROM_LOGIN_SC
 import static com.mapbox.mapboxandroiddemo.commons.StringConstants.SKIPPED_KEY;
 import static com.mapbox.mapboxandroiddemo.commons.StringConstants.TOKEN_SAVED_KEY;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
+  ItemClickSupport.OnItemClickListener {
   // Used to track internal navigation to the Snapshotter section
   private static final String EXTRA_NAV = "EXTRA_NAV";
   private static final String STATE_CURRENT_CATEGORY = "STATE_CURRENT_CATEGORY";
@@ -247,29 +248,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     // Item click listener
-    ItemClickSupport.addTo(recyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-      @Override
-      public void onItemClicked(RecyclerView recyclerView, int position, View view) {
-        ExampleItemModel model = adapter.getItemAt(position);
-
-        // in case it's an info tile
-        if (model != null) {
-
-          // Prevents rapid double click.
-          if (SystemClock.elapsedRealtime() - clickTimeOfLastSelectedExample > CLICK_SPEED_THRESHOLD_MS) {
-            clickTimeOfLastSelectedExample = SystemClock.elapsedRealtime();
-            if (showJavaExamples) {
-              startActivity(model.getJavaActivity());
-            } else {
-              startActivity(model.getKotlinActivity());
-            }
-
-            analytics.clickedOnIndividualExample(getString(model.getTitle()), loggedIn);
-            analytics.viewedScreen(getString(model.getTitle()), loggedIn);
-          }
-        }
-      }
-    });
+    ItemClickSupport.addTo(recyclerView).setOnItemClickListener(this);
 
     DrawerLayout drawer = findViewById(R.id.drawer_layout);
     ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -300,6 +279,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         .apply();
     }
     analytics.trackEvent(OPENED_APP, loggedIn);
+  }
+
+  @Override
+  public void onItemClicked(RecyclerView recyclerView, int position, View view) {
+    ExampleItemModel model = adapter.getItemAt(position);
+
+    // in case it's an info tile
+    if (model != null) {
+
+      // Prevents rapid double click.
+      if (SystemClock.elapsedRealtime() - clickTimeOfLastSelectedExample > CLICK_SPEED_THRESHOLD_MS) {
+        clickTimeOfLastSelectedExample = SystemClock.elapsedRealtime();
+        if (showJavaExamples) {
+          startActivity(model.getJavaActivity());
+        } else {
+          startActivity(model.getKotlinActivity());
+        }
+
+        analytics.clickedOnIndividualExample(getString(model.getTitle()), loggedIn);
+        analytics.viewedScreen(getString(model.getTitle()), loggedIn);
+      }
+    }
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    ItemClickSupport.addTo(recyclerView).setOnItemClickListener(this);
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    ItemClickSupport.removeFrom(recyclerView);
   }
 
   @Override
