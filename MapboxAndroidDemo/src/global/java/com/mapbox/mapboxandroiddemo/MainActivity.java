@@ -5,8 +5,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,7 +49,6 @@ import com.mapbox.mapboxandroiddemo.examples.dds.InfoWindowSymbolLayerActivity;
 import com.mapbox.mapboxandroiddemo.examples.dds.KotlinStyleCirclesCategoricallyActivity;
 import com.mapbox.mapboxandroiddemo.examples.dds.LineGradientActivity;
 import com.mapbox.mapboxandroiddemo.examples.dds.MultipleGeometriesActivity;
-import com.mapbox.mapboxandroiddemo.examples.javaservices.MultipleGeometriesDirectionsRouteActivity;
 import com.mapbox.mapboxandroiddemo.examples.dds.MultipleHeatmapStylingActivity;
 import com.mapbox.mapboxandroiddemo.examples.dds.PolygonHolesActivity;
 import com.mapbox.mapboxandroiddemo.examples.dds.PolygonSelectToggleActivity;
@@ -64,21 +63,22 @@ import com.mapbox.mapboxandroiddemo.examples.extrusions.Indoor3DMapActivity;
 import com.mapbox.mapboxandroiddemo.examples.extrusions.MarathonExtrusionActivity;
 import com.mapbox.mapboxandroiddemo.examples.extrusions.PopulationDensityExtrusionActivity;
 import com.mapbox.mapboxandroiddemo.examples.extrusions.RotationExtrusionActivity;
-import com.mapbox.mapboxandroiddemo.examples.javaservices.ElevationQueryActivity;
 import com.mapbox.mapboxandroiddemo.examples.javaservices.DirectionsActivity;
 import com.mapbox.mapboxandroiddemo.examples.javaservices.DirectionsGradientLineActivity;
+import com.mapbox.mapboxandroiddemo.examples.javaservices.ElevationQueryActivity;
 import com.mapbox.mapboxandroiddemo.examples.javaservices.GeocodingActivity;
 import com.mapbox.mapboxandroiddemo.examples.javaservices.IsochroneActivity;
 import com.mapbox.mapboxandroiddemo.examples.javaservices.IsochroneSeekbarActivity;
 import com.mapbox.mapboxandroiddemo.examples.javaservices.MapMatchingActivity;
 import com.mapbox.mapboxandroiddemo.examples.javaservices.MatrixApiActivity;
+import com.mapbox.mapboxandroiddemo.examples.javaservices.MultipleGeometriesDirectionsRouteActivity;
 import com.mapbox.mapboxandroiddemo.examples.javaservices.OptimizationActivity;
 import com.mapbox.mapboxandroiddemo.examples.javaservices.SimplifyPolylineActivity;
 import com.mapbox.mapboxandroiddemo.examples.javaservices.StaticImageActivity;
 import com.mapbox.mapboxandroiddemo.examples.javaservices.TilequeryActivity;
 import com.mapbox.mapboxandroiddemo.examples.javaservices.TurfLineDistanceActivity;
-import com.mapbox.mapboxandroiddemo.examples.javaservices.TurfRingActivity;
 import com.mapbox.mapboxandroiddemo.examples.javaservices.TurfPhysicalCircleActivity;
+import com.mapbox.mapboxandroiddemo.examples.javaservices.TurfRingActivity;
 import com.mapbox.mapboxandroiddemo.examples.labs.AnimatedImageGifActivity;
 import com.mapbox.mapboxandroiddemo.examples.labs.AnimatedMarkerActivity;
 import com.mapbox.mapboxandroiddemo.examples.labs.CalendarIntegrationActivity;
@@ -189,6 +189,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
   private static final String STATE_CURRENT_CATEGORY = "STATE_CURRENT_CATEGORY";
   private static final String STATE_TOOLBAR_TITLE = "STATE_TOOLBAR_TITLE";
   private static final String STATE_SHOW_JAVA = "STATE_SHOW_JAVA";
+  private static final String TAG = "MainActivity";
 
   private final ArrayList<ExampleItemModel> exampleItemModels = new ArrayList<>();
 
@@ -204,14 +205,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
   private boolean loggedIn;
   private int currentCategory = R.id.nav_basics;
   private boolean showJavaExamples = true;
-  private long clickTimeOfLastSelectedExample = 0;
-  public static final long CLICK_SPEED_THRESHOLD_MS = 1000;
 
   @Override
   @AddTrace(name = "onCreateMainActivity")
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    Log.d(TAG, "onCreate: ");
 
     loggedIn = PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
       .getBoolean(TOKEN_SAVED_KEY, false);
@@ -283,35 +283,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
   @Override
   public void onItemClicked(RecyclerView recyclerView, int position, View view) {
+    Log.d(TAG, "onItemClicked: ");
     ExampleItemModel model = adapter.getItemAt(position);
 
     // in case it's an info tile
     if (model != null) {
 
-      // Prevents rapid double click.
-      if (SystemClock.elapsedRealtime() - clickTimeOfLastSelectedExample > CLICK_SPEED_THRESHOLD_MS) {
-        clickTimeOfLastSelectedExample = SystemClock.elapsedRealtime();
-        if (showJavaExamples) {
-          startActivity(model.getJavaActivity());
-        } else {
-          startActivity(model.getKotlinActivity());
-        }
-
-        analytics.clickedOnIndividualExample(getString(model.getTitle()), loggedIn);
-        analytics.viewedScreen(getString(model.getTitle()), loggedIn);
+      if (showJavaExamples) {
+        startActivity(model.getJavaActivity());
+      } else {
+        startActivity(model.getKotlinActivity());
       }
+
+      analytics.clickedOnIndividualExample(getString(model.getTitle()), loggedIn);
+      analytics.viewedScreen(getString(model.getTitle()), loggedIn);
+
     }
   }
 
   @Override
   protected void onResume() {
     super.onResume();
+    Log.d(TAG, "onResume: ");
     ItemClickSupport.addTo(recyclerView).setOnItemClickListener(this);
   }
 
   @Override
   protected void onPause() {
     super.onPause();
+    Log.d(TAG, "onPause: ");
     ItemClickSupport.removeFrom(recyclerView);
   }
 
