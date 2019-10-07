@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -201,6 +200,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
   private ExampleAdapter adapter;
   private RecyclerView recyclerView;
   private TextView noExamplesTv;
+  private ItemClickSupport itemClickSupport;
 
   private boolean loggedIn;
   private int currentCategory = R.id.nav_basics;
@@ -211,7 +211,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    Log.d(TAG, "onCreate: ");
 
     loggedIn = PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
       .getBoolean(TOKEN_SAVED_KEY, false);
@@ -248,7 +247,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     // Item click listener
-    ItemClickSupport.addTo(recyclerView).setOnItemClickListener(this);
+    itemClickSupport = ItemClickSupport.addTo(recyclerView);
+    itemClickSupport.setOnItemClickListener(this);
 
     DrawerLayout drawer = findViewById(R.id.drawer_layout);
     ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -283,7 +283,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
   @Override
   public void onItemClicked(RecyclerView recyclerView, int position, View view) {
-    Log.d(TAG, "onItemClicked: ");
     ExampleItemModel model = adapter.getItemAt(position);
 
     // in case it's an info tile
@@ -297,22 +296,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
       analytics.clickedOnIndividualExample(getString(model.getTitle()), loggedIn);
       analytics.viewedScreen(getString(model.getTitle()), loggedIn);
-
     }
   }
 
   @Override
   protected void onResume() {
     super.onResume();
-    Log.d(TAG, "onResume: ");
-    ItemClickSupport.addTo(recyclerView).setOnItemClickListener(this);
+    itemClickSupport.setOnItemClickListener(this);
   }
 
   @Override
   protected void onPause() {
     super.onPause();
-    Log.d(TAG, "onPause: ");
-    ItemClickSupport.removeFrom(recyclerView);
+    itemClickSupport.setOnItemClickListener(null);
   }
 
   @Override
